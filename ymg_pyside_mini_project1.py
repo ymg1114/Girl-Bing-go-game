@@ -58,6 +58,7 @@ class BOARD(SingletonInstane):
 
 def Reset_bingo_Board():
     BOARD.instance().score = 0
+    
     _GIRL_IDX_POOL = copy.deepcopy(GIRL_IDX_POOL)
     for x in range(BOARD_SIZE):
         for y in range(BOARD_SIZE):
@@ -68,9 +69,10 @@ def Reset_bingo_Board():
             # image = QImage(cur + f'\\girl\\girl_{idx}.jpg')
             girl.setPixmap( QPixmap.fromImage(image).scaled(BOARD_SCALE, BOARD_SCALE) )
             girl.setPos(x*BOARD_SCALE, y*BOARD_SCALE)
+            girl.done = False
             Girl_bingo_Board(0, 0, 700, 800).instance().addItem(girl)
             
-            BOARD.instance().config[y, x] = girl
+            BOARD.instance().config[ y, x ] = girl
     
 
 class Girl(QGraphicsPixmapItem):
@@ -218,7 +220,7 @@ class Girl_bingo_Window(QMainWindow, Ui_MainWindow):
         self.progressBar.setValue(BOARD.instance().score*10)
 
     def timerEvent(self, e):
-        if self.step >= 1000 or self.progressBar.value() == 100:
+        if self.step >= 1000:
             self.timer.stop()
             self.GameStart.setText('GameFinished')
             return
@@ -226,6 +228,9 @@ class Girl_bingo_Window(QMainWindow, Ui_MainWindow):
         self.step = self.step + 1
         score = np.sum( [1 for v_low in BOARD.instance().config for v in v_low if v.done] )
         self.progressBar.setValue( score*4 )
+        
+        if self.progressBar.value() == 100:
+            self.GameStart.setText('GameFinished')
         
     def doAction(self):
         if self.timer.isActive():
