@@ -12,21 +12,8 @@ import copy
 import numpy as np
 import json
 
-cur = os.getcwd()
-
-if len(sys.argv) > 1:
-    build = [k for k in sys.argv if 'build' in k][0]
-    
-    if json.loads(build[6:].lower()):
-        _girl = os.path.join(os.path.dirname(__file__))
-        _nice = os.path.join(os.path.dirname(__file__))
-    else:
-        _girl = os.path.join(os.path.dirname(__file__), 'girl')
-        _nice = os.path.join(os.path.dirname(__file__), 'nice')
-
-else:
-    _girl = os.path.join(os.path.dirname(__file__), 'girl')
-    _nice = os.path.join(os.path.dirname(__file__), 'nice')
+_girl = os.path.join(os.path.dirname(__file__), 'girl')
+_nice = os.path.join(os.path.dirname(__file__), 'nice')
 
 
 BOARD_SIZE = 5
