@@ -7,7 +7,10 @@ call conda activate ymg
 pyinstaller --name="Girl bing-go" ^
 -p="C:\Users\skdid\anaconda3\envs\ymg\Lib\site-packages\PySide6\plugins/platforms" ^
 --add-data="C:\Users\skdid\anaconda3\envs\ymg\Lib\site-packages\PySide6\plugins/platforms" ^
---add-data="C:\Users\skdid\Downloads\PySide6 공부용 예제\ymg_pyside_examples\girl; C:\Users\skdid\Downloads\PySide6 공부용 예제\ymg_pyside_examples\girl" ^
---add-data="C:\Users\skdid\Downloads\PySide6 공부용 예제\ymg_pyside_examples\nice; C:\Users\skdid\Downloads\PySide6 공부용 예제\ymg_pyside_examples\nice" ^
+--add-data="C:\Users\skdid\Documents\Girl-Bing-go-game\girl; C:\Users\skdid\Documents\Girl-Bing-go-game\girl" ^
+--add-data="C:\Users\skdid\Documents\Girl-Bing-go-game\nice; C:\Users\skdid\Documents\Girl-Bing-go-game\nice" ^
 --onefile ^
 ymg_pyside_mini_project1.py 
+pause
+
+C:\Users\skdid\Documents\Girl-Bing-go-game
