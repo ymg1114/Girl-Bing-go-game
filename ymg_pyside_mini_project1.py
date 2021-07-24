@@ -1,4 +1,6 @@
 import sys
+import argparse
+import pathlib
 from PySide6.QtCore import (QLineF, QMimeData, QPoint, QPointF, Qt)
 from PySide6.QtGui import ( QColor, QDrag, QImage, QPainter, QPixmap, QPen)
 from PySide6.QtWidgets import (QApplication, QGraphicsRectItem, QGraphicsScene,
@@ -12,13 +14,9 @@ import copy
 import numpy as np
 import json
 
-_girl = os.path.join(os.path.dirname(__file__), 'girl')
-_nice = os.path.join(os.path.dirname(__file__), 'nice')
-
-
 BOARD_SIZE = 5
 BOARD_SCALE = 100
-
+GIRL_IDX_POOL = [i for i in range(5)] * 5 
 
 class SingletonInstane:
     __instance = None
@@ -33,44 +31,25 @@ class SingletonInstane:
         cls.instance = cls.__getInstance
         return cls.__instance
 
-
-
-GIRL_IDX_POOL = [i for i in range(5)] * 5 
-
 class BOARD(SingletonInstane):
     config = np.array( [[None for _ in range(BOARD_SIZE)] for _ in range(BOARD_SIZE)] )
     score = 0
-    
-    
-
-def Reset_bingo_Board():
-    BOARD.instance().score = 0
-    
-    _GIRL_IDX_POOL = copy.deepcopy(GIRL_IDX_POOL)
-    for x in range(BOARD_SIZE):
-        for y in range(BOARD_SIZE):
-            idx = random.sample(_GIRL_IDX_POOL, 1)[0]
-            _GIRL_IDX_POOL.remove(idx)
-            girl = Girl(x, y, idx)
-            image = QImage(_girl + f'\\girl_{idx}.jpg')
-            # image = QImage(cur + f'\\girl\\girl_{idx}.jpg')
-            girl.setPixmap( QPixmap.fromImage(image).scaled(BOARD_SCALE, BOARD_SCALE) )
-            girl.setPos(x*BOARD_SCALE, y*BOARD_SCALE)
-            girl.done = False
-            Girl_bingo_Board(0, 0, 700, 800).instance().addItem(girl)
-            
-            BOARD.instance().config[ y, x ] = girl
-    
 
 class Girl(QGraphicsPixmapItem):
     
-    def __init__(self, x, y, idx, *args, **kargs):
+    def __init__(self, installer, x, y, idx, *args, **kargs):
         super().__init__(*args, **kargs)
+        self.installer = installer
         self.setAcceptDrops(True) 
         self.setCursor(Qt.OpenHandCursor)
         self._start_drag_distance = QApplication.startDragDistance()
-        self.ImageData = QImage(_girl + f'\\girl_{idx}.jpg')
-        # self.ImageData = QImage(cur + f'\\girl\\girl_{idx}.jpg')
+
+        if self.installer:
+            image_path = os.path.join(os.path.dirname(__file__), 'image', f'girl_{idx}.jpg')
+        else:
+            image_path = os.path.join(os.path.dirname(__file__), 'image', 'girl', f'girl_{idx}.jpg')
+
+        self.ImageData = QImage(image_path)
         self.pixmap = QPixmap.fromImage(self.ImageData).scaled(BOARD_SCALE, BOARD_SCALE)
         
         self.object_location = (y, x)
@@ -135,24 +114,32 @@ class Girl(QGraphicsPixmapItem):
         
     def get_girl_x_index(self, x_low): 
         return np.array( [v.idx for v in BOARD.instance().config[ :, x_low ]] )
-    
-    
+
     def oh_bingo_x(self, x_low):
-        image = QImage(_nice + f'\\bingo.jpg')
-        # image = QImage(cur + f'\\nice\\bingo.jpg')
+        if self.installer:
+            image_path = os.path.join(os.path.dirname(__file__), 'image', f'bingo.jpg')
+        else:
+            image_path = os.path.join(os.path.dirname(__file__), 'image', 'nice', f'bingo.jpg')
+
+        image = QImage(image_path)
         for v in BOARD.instance().config[ :, x_low ]:
             v.setPixmap( QPixmap.fromImage(image).scaled(BOARD_SCALE, BOARD_SCALE) )
             v.setAcceptDrops(False) 
             v.done = True
-            
+
     def oh_bingo_y(self, y_low):
-        image = QImage(_nice + f'\\bingo.jpg')
-        # image = QImage(cur + f'\\nice\\bingo.jpg')
+        if self.installer:
+            image_path = os.path.join(os.path.dirname(__file__), 'image', f'bingo.jpg')
+        else:
+            image_path = os.path.join(os.path.dirname(__file__), 'image', 'nice', f'bingo.jpg')
+
+        image = QImage(image_path)
+
         for v in BOARD.instance().config[ y_low, : ]:
             v.setPixmap( QPixmap.fromImage(image).scaled(BOARD_SCALE, BOARD_SCALE) )
             v.setAcceptDrops(False) 
             v.done = True
-    
+
     def check_score(self):
         BOARD.instance().score = 0
 
@@ -166,17 +153,16 @@ class Girl(QGraphicsPixmapItem):
                 BOARD.instance().score += 1
                 self.oh_bingo_x(x_low)
 
-          
 
 class Girl_bingo_view(QGraphicsView):
     def __init__(self, scene, *args):
         super().__init__(scene, *args)
-       
+
 
 class Girl_bingo_Board(QGraphicsScene, SingletonInstane):
     def __init__(self, *args, **kargs):
         super().__init__(*args, **kargs)
-    
+
         for y in range(BOARD_SIZE):
             for x in range(BOARD_SIZE):
                 Rect = QGraphicsRectItem()
@@ -186,23 +172,25 @@ class Girl_bingo_Board(QGraphicsScene, SingletonInstane):
 
 
 class Girl_bingo_Window(QMainWindow, Ui_MainWindow):
-
-    def __init__(self):
+    """
+    GUI Form of Girl Bingo
+    """
+    def __init__(self, installer=False):
         super(Girl_bingo_Window, self).__init__()
         self.setupUi(self)
         self.setWindowTitle("Girl bing-go")
 
+        self.installer = installer
         self.view = Girl_bingo_view(Girl_bingo_Board(0, 0, 700, 800).instance(), self.widget)
         self.view.setRenderHint(QPainter.Antialiasing)
         self.view.setViewportUpdateMode(QGraphicsView.BoundingRectViewportUpdate)
         self.view.setBackgroundBrush(QColor(230, 200, 167))
 
-
         self.timer = QBasicTimer()
         self.step = 0
         
         self.GameStart.clicked.connect(self.doAction)
-        self.RandomShuffle.clicked.connect(Reset_bingo_Board)
+        self.RandomShuffle.clicked.connect(self.Reset_bingo_Board)
         self.Close.clicked.connect(self.close)
         self.progressBar.setValue(BOARD.instance().score*10)
 
@@ -227,10 +215,42 @@ class Girl_bingo_Window(QMainWindow, Ui_MainWindow):
             self.timer.start(1000, self)
             self.GameStart.setText('GameStop')
 
-        
-        
+    def Reset_bingo_Board(self):
+        BOARD.instance().score = 0
+
+        _GIRL_IDX_POOL = copy.deepcopy(GIRL_IDX_POOL)
+        for x in range(BOARD_SIZE):
+            for y in range(BOARD_SIZE):
+                idx = random.sample(_GIRL_IDX_POOL, 1)[0]
+                _GIRL_IDX_POOL.remove(idx)
+                girl = Girl(self.installer, x, y, idx)
+
+                if self.installer:
+                    image_path = os.path.join(os.path.dirname(__file__), 'image', f'girl_{idx}.jpg')
+                else:
+                    image_path = os.path.join(os.path.dirname(__file__), 'image', 'girl', f'girl_{idx}.jpg')
+
+                image = QImage(image_path)
+                girl.setPixmap( QPixmap.fromImage(image).scaled(BOARD_SCALE, BOARD_SCALE) )
+                girl.setPos(x*BOARD_SCALE, y*BOARD_SCALE)
+                girl.done = False
+                Girl_bingo_Board(0, 0, 700, 800).instance().addItem(girl)
+                
+                BOARD.instance().config[ y, x ] = girl
+
 if __name__== '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '--mode', type=str, default='installer',
+        choices=['native','installer'],
+        help='What mode should the application run on?'
+    )
+    args = parser.parse_args()
+    mode = args.mode
+    installer = mode == 'installer'
+    print("Running Girl bing-go")
     app = QApplication(sys.argv)
-    window = Girl_bingo_Window()
+    window = Girl_bingo_Window(installer=installer)
     window.show() 
-    app.exec()
+    sys.exit(app.exec())
+    print("Terminating Girl bing-go")
