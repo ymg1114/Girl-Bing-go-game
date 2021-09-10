@@ -1,6 +1,4 @@
 import sys
-import argparse
-import pathlib
 from PySide6.QtCore import (QLineF, QMimeData, QPoint, QPointF, Qt)
 from PySide6.QtGui import ( QColor, QDrag, QImage, QPainter, QPixmap, QPen)
 from PySide6.QtWidgets import (QApplication, QGraphicsRectItem, QGraphicsScene,
@@ -37,17 +35,13 @@ class BOARD(SingletonInstane):
 
 class Girl(QGraphicsPixmapItem):
     
-    def __init__(self, installer, x, y, idx, *args, **kargs):
+    def __init__(self, x, y, idx, *args, **kargs):
         super().__init__(*args, **kargs)
-        self.installer = installer
         self.setAcceptDrops(True) 
         self.setCursor(Qt.OpenHandCursor)
         self._start_drag_distance = QApplication.startDragDistance()
 
-        if self.installer:
-            image_path = os.path.join(os.path.dirname(__file__), 'image', f'girl_{idx}.jpg')
-        else:
-            image_path = os.path.join(os.path.dirname(__file__), 'image', 'girl', f'girl_{idx}.jpg')
+        image_path = os.path.join(os.path.dirname(__file__), 'image', 'girl', f'girl_{idx}.jpg')
 
         self.ImageData = QImage(image_path)
         self.pixmap = QPixmap.fromImage(self.ImageData).scaled(BOARD_SCALE, BOARD_SCALE)
@@ -116,10 +110,7 @@ class Girl(QGraphicsPixmapItem):
         return np.array( [v.idx for v in BOARD.instance().config[ :, x_low ]] )
 
     def oh_bingo_x(self, x_low):
-        if self.installer:
-            image_path = os.path.join(os.path.dirname(__file__), 'image', f'bingo.jpg')
-        else:
-            image_path = os.path.join(os.path.dirname(__file__), 'image', 'nice', f'bingo.jpg')
+        image_path = os.path.join(os.path.dirname(__file__), 'image', 'nice', f'bingo.jpg')
 
         image = QImage(image_path)
         for v in BOARD.instance().config[ :, x_low ]:
@@ -128,10 +119,7 @@ class Girl(QGraphicsPixmapItem):
             v.done = True
 
     def oh_bingo_y(self, y_low):
-        if self.installer:
-            image_path = os.path.join(os.path.dirname(__file__), 'image', f'bingo.jpg')
-        else:
-            image_path = os.path.join(os.path.dirname(__file__), 'image', 'nice', f'bingo.jpg')
+        image_path = os.path.join(os.path.dirname(__file__), 'image', 'nice', f'bingo.jpg')
 
         image = QImage(image_path)
 
@@ -175,12 +163,11 @@ class Girl_bingo_Window(QMainWindow, Ui_MainWindow):
     """
     GUI Form of Girl Bingo
     """
-    def __init__(self, installer=False):
+    def __init__(self):
         super(Girl_bingo_Window, self).__init__()
         self.setupUi(self)
         self.setWindowTitle("Girl bing-go")
 
-        self.installer = installer
         self.view = Girl_bingo_view(Girl_bingo_Board(0, 0, 700, 800).instance(), self.widget)
         self.view.setRenderHint(QPainter.Antialiasing)
         self.view.setViewportUpdateMode(QGraphicsView.BoundingRectViewportUpdate)
@@ -223,15 +210,12 @@ class Girl_bingo_Window(QMainWindow, Ui_MainWindow):
             for y in range(BOARD_SIZE):
                 idx = random.sample(_GIRL_IDX_POOL, 1)[0]
                 _GIRL_IDX_POOL.remove(idx)
-                girl = Girl(self.installer, x, y, idx)
+                girl = Girl(x, y, idx)
 
-                if self.installer:
-                    image_path = os.path.join(os.path.dirname(__file__), 'image', f'girl_{idx}.jpg')
-                else:
-                    image_path = os.path.join(os.path.dirname(__file__), 'image', 'girl', f'girl_{idx}.jpg')
+                image_path = os.path.join(os.path.dirname(__file__), 'image', 'girl', f'girl_{idx}.jpg')
 
                 image = QImage(image_path)
-                girl.setPixmap( QPixmap.fromImage(image).scaled(BOARD_SCALE, BOARD_SCALE) )
+                girl.setPixmap(QPixmap.fromImage(image).scaled(BOARD_SCALE, BOARD_SCALE) )
                 girl.setPos(x*BOARD_SCALE, y*BOARD_SCALE)
                 girl.done = False
                 Girl_bingo_Board(0, 0, 700, 800).instance().addItem(girl)
@@ -239,18 +223,9 @@ class Girl_bingo_Window(QMainWindow, Ui_MainWindow):
                 BOARD.instance().config[ y, x ] = girl
 
 if __name__== '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '--mode', type=str, default='installer',
-        choices=['native','installer'],
-        help='What mode should the application run on?'
-    )
-    args = parser.parse_args()
-    mode = args.mode
-    installer = mode == 'installer'
     print("Running Girl bing-go")
     app = QApplication(sys.argv)
-    window = Girl_bingo_Window(installer=installer)
+    window = Girl_bingo_Window()
     window.show() 
     sys.exit(app.exec())
     print("Terminating Girl bing-go")

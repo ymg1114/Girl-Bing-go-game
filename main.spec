@@ -21,8 +21,7 @@ a = Analysis(
     binaries=[],
     # Put data(i.e. assets) under virtual 'image/'
     datas=[
-        (girl_imgs, 'image'),
-        (nice_imgs, 'image'),
+        ('image', 'image'),
     ],
     hiddenimports=[],
     hookspath=[],

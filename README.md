@@ -3,7 +3,7 @@ PySide6 mini project
 
 실행 방법
 --
-`python ymg_pyside_mini_project1.py --mode native`로 프로그램을 실행한다.
+`python ymg_pyside_mini_project1.py`로 프로그램을 실행한다.
 
 실행파일 생성 (수동)
 --
