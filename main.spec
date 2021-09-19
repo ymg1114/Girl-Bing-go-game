@@ -8,7 +8,7 @@ from platform import system
 cwd = os.getcwd()
 
 girl_imgs = os.path.join(cwd, 'image', 'girl', '*')
-nice_imgs = os.path.join(cwd, 'image', 'nice', '*')
+bingo_imgs = os.path.join(cwd, 'image', 'bingo', '*')
 
 site_package_paths = [path for path in sys.path if path.endswith('site-packages')]
 if not site_package_paths:
@@ -16,7 +16,7 @@ if not site_package_paths:
 
 block_cipher = None
 a = Analysis(
-    ['ymg_pyside_mini_project1.py'],
+    ['bingo_main.py'],
     pathex=site_package_paths,
     binaries=[],
     # Put data(i.e. assets) under virtual 'image/'

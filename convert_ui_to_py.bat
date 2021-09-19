@@ -4,4 +4,4 @@ call %root%\Scripts\activate.bat %root%
 
 call conda activate ymg
 
-call pyside6-uic ymg_ui2.ui -o ymg_ui2.py
+call pyside6-uic bingo_ui.ui -o bingo_ui.py
